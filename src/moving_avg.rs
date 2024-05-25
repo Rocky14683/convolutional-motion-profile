@@ -22,12 +22,11 @@ impl MovingAverage {
 
     pub fn step(&mut self, value: f32) -> f32 {
         if self.queue.len() == self.size {
-            self.sum = *self.queue.front().unwrap_or(&0.0);
-            self.queue.pop_front();
+            self.sum -= self.queue.pop_front().unwrap_or_default();
         }
 
-        self.queue.push_front(value);
         self.sum += value;
+        self.queue.push_back(value);
 
         return self.solve();
     }
@@ -37,6 +36,6 @@ impl MovingAverage {
             return 0_f32;
         }
 
-        return self.sum / (self.queue.len() as f32);
+        return self.sum / self.queue.len() as f32;
     }
 }
