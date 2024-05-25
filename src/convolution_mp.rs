@@ -62,6 +62,44 @@ impl ConvolutionalMotionProfile {
         }
 
 
+        return profile;
+    }
+}
+
+pub struct NDofMotionProfile {
+    constraints: Vec<f32>,
+}
+
+impl NDofMotionProfile {
+    pub fn new(constraints: Vec<f32>) -> Self {
+        Self {
+            constraints
+        }
+    }
+
+    pub fn generate(&self, distance: f32, dt: f32) -> Vec<f32> {
+        let mut profile: Vec<f32> =
+            vec![self.constraints[0]; ((distance / self.constraints[1]).round() / dt) as usize];
+
+        for i in 0..self.constraints.len() - 1 {
+            let mut new_profile: Vec<f32> = vec![0_f32; 1];
+            let step: u32 = (self.constraints[i] + self.constraints[i + 1] / dt) as u32;
+            let mut avg = MovingAverage::new(step as usize);
+
+            for _i in 0..step {
+                avg.step(0_f32);
+            }
+
+            for speed in profile {
+                new_profile.push(avg.step(speed));
+            }
+
+            for _i in 0..step {
+                new_profile.push(avg.step(0_f32));
+            }
+
+            profile = new_profile;
+        }
 
         return profile;
     }
